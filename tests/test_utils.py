@@ -1,5 +1,5 @@
 # Test case for str_is_char()
-from src.utils import char_is_a_to_z, int_is_digit, str_is_char
+from human_re.utils import char_is_a_to_z, int_is_digit, str_is_char
 
 
 def test_str_is_char():

@@ -3,7 +3,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 from re import Pattern
-from typing import Tuple, Union
+from typing import Tuple, Union, Optional
 
 import human_re.utils as utils
 from human_re.elements.multiple import Multiple, Range, _SpecialQuantifier
@@ -37,6 +37,10 @@ class Letter(RegexElement, Quantifiable):
     additional_characters: Tuple[str, ...] = tuple()
     """ Additional characters to include in the letter matching (default: empty tuple)."""
 
+    name: Optional[str] = None
+    """ name of the matching group. None is also allowed. Read `src.elements.named.Named` 
+    doc for more information about the options here."""
+
     def compile(self) -> Pattern:
         letter_pattern_str = f"{self.start}-{self.stop}"
         if self.umlauts:
@@ -53,7 +57,7 @@ class Letter(RegexElement, Quantifiable):
         letter_pattern_str = f"[{letter_pattern_str}]"
 
         return Multiple(
-            RegexPattern(re.compile(letter_pattern_str)), times=self.times
+            RegexPattern(re.compile(letter_pattern_str)), times=self.times, name=self.name
         ).compile()
 
     def __post_init__(self):

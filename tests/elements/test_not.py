@@ -1,6 +1,4 @@
-from src import Digit
-from src.elements.literal import Literal
-from src.elements.not_ import Not
+from human_re import Digit, Literal, Not
 
 
 def test_not():

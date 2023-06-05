@@ -1,3 +1,5 @@
+import re
+
 from human_re import (
     Digit,
     Integer,
@@ -8,6 +10,7 @@ from human_re import (
     Or,
     Range,
     Regex,
+    Whitespace,
 )
 
 
@@ -113,3 +116,44 @@ def test_basic_date_regex():
 
     assert date_regex.match("2031-12-24")
     assert date_regex.match("2031-12-32") is None
+
+
+def test_german_license_plate():
+    german_plate_regex = Regex(
+        Letter(
+            "A",
+            "Z",
+            case_sensitive=True,
+            umlauts=True,
+            times=Range(1, 3),
+            name="region",
+        ),
+        Literal("-"),
+        Letter("A", "Z", case_sensitive=True, times=Range(1, 2)),
+        Optional(Whitespace()),
+        Digit(1, 9),
+        Digit(0, 9, times=Range(0, 3)),
+        Optional(
+            Regex(
+                Optional(Whitespace()),
+                Or(
+                    Literal("E", name="is_electric_car"),
+                    Literal("H", name="is_antique_car"),
+                ),
+            ),
+        ),
+        match_start=True,
+        match_end=True
+    ).compile()
+    # '^((?P<region>[A-ZÜÖÄ]{1,3})\\-[A-Z]{1,2}(\\s)?[1-9]\\d{0,3}(((\\s)?((?P<is_electric_car>E)|(?P<is_antique_car>H))))?)$'
+
+    assert german_plate_regex.match("DEG-QB1")
+    assert german_plate_regex.match("HH-W1000")
+
+    assert german_plate_regex.match("DEG-QB01") is None
+    assert german_plate_regex.match("HH-WXXX 1000") is None
+
+    assert german_plate_regex.match("M-AB 123").group("region") == "M"
+    assert german_plate_regex.match("M-AB 123 E").group("is_electric_car") == "E"
+    assert german_plate_regex.match("M-AB 123H").group("is_antique_car") == "H"
+
